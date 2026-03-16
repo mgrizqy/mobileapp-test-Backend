@@ -32,7 +32,9 @@ export class SessionsService {
   }
 
   async findMatchingSession(userId: string, refreshToken: string): Promise<SessionDocument> {
-    const sessions = await this.findByUserId(userId);
+    // Must NOT use findByUserId here — that method strips refreshTokenHash for public responses.
+    // We need the hash to verify the token, so we query directly with no field exclusions.
+    const sessions = await this.sessionModel.find({ userId: new Types.ObjectId(userId) });
 
     for (const session of sessions) {
       const matches = await bcrypt.compare(refreshToken, session.refreshTokenHash);
