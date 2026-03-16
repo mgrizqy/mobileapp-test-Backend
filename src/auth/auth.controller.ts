@@ -26,11 +26,11 @@ export class AuthController {
 
   @Post('refresh')
   refresh(@Body() dto: RefreshDto) {
-    return this.authService.refresh(dto.userId, dto.refreshToken);
+    return this.authService.refresh(dto.refreshToken);
   }
 
   @Post('logout')
   logout(@Body() dto: RefreshDto) {
-    return this.authService.logout(dto.userId, dto.refreshToken);
+    return this.authService.logout(dto.refreshToken);
   }
 }

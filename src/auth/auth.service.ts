@@ -38,7 +38,10 @@ export class AuthService {
     return tokens;
   }
 
-  async refresh(userId: string, refreshToken: string) {
+  async refresh(refreshToken: string) {
+    // Extract userId from the refresh token itself — no need for client to send it separately
+    const userId = await this.extractUserIdFromRefreshToken(refreshToken);
+
     const user = await this.usersService.findById(userId);
     if (!user) throw new UnauthorizedException();
 
@@ -52,10 +55,28 @@ export class AuthService {
     return tokens;
   }
 
-  async logout(userId: string, refreshToken: string) {
+  async logout(refreshToken: string) {
+    // Extract userId from the refresh token itself — no need for client to send it separately
+    const userId = await this.extractUserIdFromRefreshToken(refreshToken);
+
     const session = await this.sessionsService.findMatchingSession(userId, refreshToken);
     await this.sessionsService.delete(session._id.toString());
     return { message: 'Logged out successfully' };
+  }
+
+  private async extractUserIdFromRefreshToken(refreshToken: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+      });
+
+      // Guard against hand-crafted tokens that pass verification but omit sub
+      if (!payload?.sub) throw new UnauthorizedException();
+
+      return payload.sub as string;
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 
   private async generateTokens(userId: string, role: string) {
