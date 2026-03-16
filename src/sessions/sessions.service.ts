@@ -28,7 +28,7 @@ export class SessionsService {
   }
 
   async findByUserId(userId: string): Promise<SessionDocument[]> {
-    return this.sessionModel.find({ userId: new Types.ObjectId(userId) });
+    return this.sessionModel.find({ userId: new Types.ObjectId(userId) }).select('-refreshTokenHash -__v');
   }
 
   async findMatchingSession(userId: string, refreshToken: string): Promise<SessionDocument> {
