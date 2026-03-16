@@ -7,6 +7,6 @@
 - bcrypt for password hashing
 
 ## Setup
-1. Copy `.env.example` to `.env` and fill in values
+1. fill in `.env`
 2. `npm install`
 3. `npm run start:dev`
